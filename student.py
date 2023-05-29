@@ -8,6 +8,15 @@ class Student:
         self.root.geometry("1520x780+0+0")
         self.root.title("Smart Attendance System")
 
+        # variables
+        self.var_dept=StringVar()
+        self.var_course=StringVar()
+        self.var_batch=StringVar()
+        self.var_semsester=StringVar()
+        self.var_teacher=StringVar()
+        self.var_std_id=StringVar()
+        self.var_std_name=StringVar()
+
         img=Image.open(r"F:\7 semester\Artificial Intelligence\Project\Smart Attendance System\college_images\iStock-182059956_18390_t12.jpg")
         img=img.resize((500,130),Image.ANTIALIAS)
         self.photoimg=ImageTk.PhotoImage(img)
@@ -57,7 +66,7 @@ class Student:
         #Department
         dep_label=Label(Current_course_fram,text="Department:",font=("times new roman",12,"bold"),bg="black",fg="#00c3e3")
         dep_label.grid(row=0,column=0,padx=8,sticky=E)
-        dep_combo=ttk.Combobox(Current_course_fram,font=("times new roman",10,"bold"),width=17,state="readonly")
+        dep_combo=ttk.Combobox(Current_course_fram,textvariable=self.var_dept,font=("times new roman",10,"bold"),width=17,state="readonly")
         dep_combo["values"]=("select department","CSE","EEE","Pharmacy")
         dep_combo.current(0)
         dep_combo.grid(row=0,column=1,pady=8,padx=2,sticky=W)
@@ -65,7 +74,7 @@ class Student:
         course_label=Label(Current_course_fram,text="Course:",font=("times new roman",12,"bold"),bg="black",fg="#00c3e3")
         course_label.grid(row=0,column=2,padx=8,sticky=E)
        
-        dep_combo=ttk.Combobox(Current_course_fram,font=("times new roman",10,"bold"),width=17,state="readonly")
+        dep_combo=ttk.Combobox(Current_course_fram,textvariable=self.var_course,font=("times new roman",10,"bold"),width=17,state="readonly")
         dep_combo["values"]=("select Course","Artificial Intelligence","Artificial Intelligence Lab","Digital Image Processing","Computer Graphics And Animation","Data Mining And Data Warehousung","Criptography And Information Security")
         dep_combo.current(0)
         dep_combo.grid(row=0,column=3,pady=8,padx=2,sticky=W)
@@ -73,7 +82,7 @@ class Student:
         course_label=Label(Current_course_fram,text="Batch:",font=("times new roman",12,"bold"),bg="black",fg="#00c3e3")
         course_label.grid(row=1,column=0,padx=8,sticky=E)
        
-        dep_combo=ttk.Combobox(Current_course_fram,font=("times new roman",10,"bold"),width=17,state="readonly")
+        dep_combo=ttk.Combobox(Current_course_fram,textvariable=self.var_batch,font=("times new roman",10,"bold"),width=17,state="readonly")
         dep_combo["values"]=("select Batch","10th","11th","12th","13th")
         dep_combo.current(0)
         dep_combo.grid(row=1,column=1,pady=8,padx=2,sticky=W)
@@ -81,7 +90,7 @@ class Student:
         course_label=Label(Current_course_fram,text="Semester:",font=("times new roman",12,"bold"),bg="black",fg="#00c3e3")
         course_label.grid(row=1,column=2,padx=8,sticky=E)
        
-        dep_combo=ttk.Combobox(Current_course_fram,font=("times new roman",10,"bold"),width=17,state="readonly")
+        dep_combo=ttk.Combobox(Current_course_fram,textvariable=self.var_semsester,font=("times new roman",10,"bold"),width=17,state="readonly")
         dep_combo["values"]=("select Semester","1st year 1st semester","1st year 2nd semester","2nd year 1st semester","2nd year 2nd semester","3rd year 1st semester","3rd year 2nd semester","4th year 1st semester","4th year 2nd semester")
         dep_combo.current(0)
         dep_combo.grid(row=1,column=3,pady=8,padx=2,sticky=W)
@@ -90,7 +99,7 @@ class Student:
         course_tearcher=Label(Current_course_fram,text="Course Teacher:",font=("times new roman",12,"bold"),bg="black",fg="#00c3e3")
         course_tearcher.grid(row=2,column=0,padx=8,sticky=E)
 
-        StudentID_entry=ttk.Entry(Current_course_fram,width=25,font=("times new roman",11,"bold"))
+        StudentID_entry=ttk.Entry(Current_course_fram,textvariable=self.var_teacher,width=25,font=("times new roman",11,"bold"))
         StudentID_entry.grid(row=2,column=1,columnspan=3,padx=0,pady=8,sticky=W)
 
         #class student info
@@ -100,20 +109,22 @@ class Student:
         student_id_label=Label(Class_student_fram,text="Student ID:",font=("times new roman",12,"bold"),bg="black",fg="#00c3e3")
         student_id_label.grid(row=0,column=0,padx=8,sticky=E)
 
-        StudentID_entry=ttk.Entry(Class_student_fram,width=20,font=("times new roman",11,"bold"))
+        StudentID_entry=ttk.Entry(Class_student_fram,textvariable=self.var_std_id,width=20,font=("times new roman",11,"bold"))
         StudentID_entry.grid(row=0,column=1,padx=0,pady=10,sticky=W)
 
         student_name_label=Label(Class_student_fram,text="Student Name:",font=("times new roman",12,"bold"),bg="black",fg="#00c3e3")
         student_name_label.grid(row=0,column=2,padx=15,sticky=E)
 
-        Student_Name_entry=ttk.Entry(Class_student_fram,width=30,font=("times new roman",11,"bold"))
+        Student_Name_entry=ttk.Entry(Class_student_fram,textvariable=self.var_std_name,width=30,font=("times new roman",11,"bold"))
         Student_Name_entry.grid(row=0,column=3,padx=0,pady=10,sticky=W)
 
         #Radio buttons
-        radiobtn1=Radiobutton(Class_student_fram,text="Take Photo Sample",value="YES",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"))
+        self.var_radio1=StringVar()
+        radiobtn1=Radiobutton(Class_student_fram,textvariable=self.var_radio1,text="Take Photo Sample",value="YES",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"))
         radiobtn1.grid(row=1,column=0,columnspan=2,padx=20,pady=0,sticky=E)
-
-        radiobtn2=Radiobutton(Class_student_fram,text="No Photo Sample",value="NO",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"))
+        
+        self.var_radio2=StringVar()
+        radiobtn2=Radiobutton(Class_student_fram,textvariable=self.var_radio2,text="No Photo Sample",value="NO",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"))
         radiobtn2.grid(row=1,column=2,padx=8,pady=0,sticky=E)
 
         btn_fram=Frame(Left_fram,bd=2,relief=RIDGE,bg="#222222")
@@ -196,6 +207,12 @@ class Student:
         self.student_table.column("Teacher",width=200)
         self.student_table.column("Photo",width=200)
 
+    # function 
+    def add_data(self):
+        if self.var_dept.get()=="Select Department" or self.var_std_name.get()=="" or self.var_std_id.get()=="":
+            
+
+        
 
 
 
