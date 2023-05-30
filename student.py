@@ -1,7 +1,8 @@
 from tkinter import*
 from tkinter import ttk
 from PIL import Image,ImageTk
-
+from tkinter import messagebox
+import mysql.connector
 class Student:
     def __init__(self,root):
         self.root=root
@@ -120,27 +121,27 @@ class Student:
 
         #Radio buttons
         self.var_radio1=StringVar()
-        radiobtn1=Radiobutton(Class_student_fram,textvariable=self.var_radio1,text="Take Photo Sample",value="YES",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"))
+        radiobtn1=Radiobutton(Class_student_fram,variable=self.var_radio1,text="Take Photo Sample",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"),value="YES")
         radiobtn1.grid(row=1,column=0,columnspan=2,padx=20,pady=0,sticky=E)
         
         self.var_radio2=StringVar()
-        radiobtn2=Radiobutton(Class_student_fram,textvariable=self.var_radio2,text="No Photo Sample",value="NO",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"))
+        radiobtn2=Radiobutton(Class_student_fram,variable=self.var_radio1,text="No Photo Sample",bg="black",fg="#00c3e3",font=("times new roman",12,"bold"),value="NO")
         radiobtn2.grid(row=1,column=2,padx=8,pady=0,sticky=E)
 
         btn_fram=Frame(Left_fram,bd=2,relief=RIDGE,bg="#222222")
         btn_fram.place(x=20,y=400,width=701,height=86)
 
         #save button
-        save_btn=Button(btn_fram,text="Save",width=16,font=("times new roman",13,"bold"),bg="green",fg="white")
+        save_btn=Button(btn_fram,text="Save",command=self.add_data,width=16,font=("times new roman",13,"bold"),bg="green",fg="white")
         save_btn.grid(row=0,column=0,sticky=W,pady=3,padx=2)
         #update button
-        update_btn=Button(btn_fram,text="Update",width=16,font=("times new roman",13,"bold"),bg="#1164B4",fg="white")
+        update_btn=Button(btn_fram,text="Update",command=self.update_data,width=16,font=("times new roman",13,"bold"),bg="#1164B4",fg="white")
         update_btn.grid(row=0,column=1,sticky=W,pady=3,padx=2)
         #delete button
-        delete_btn=Button(btn_fram,text="Delete",width=16,font=("times new roman",13,"bold"),bg="#8b0000",fg="white")
+        delete_btn=Button(btn_fram,text="Delete",command=self.delete_data,width=16,font=("times new roman",13,"bold"),bg="#8b0000",fg="white")
         delete_btn.grid(row=0,column=2,sticky=W,pady=3,padx=2)
         #Reset button
-        Reset_btn=Button(btn_fram,text="Reset",width=16,font=("times new roman",13,"bold"),bg="#0059b3",fg="white")
+        Reset_btn=Button(btn_fram,text="Reset",command=self.reset_data,width=16,font=("times new roman",13,"bold"),bg="#0059b3",fg="white")
         Reset_btn.grid(row=0,column=3,sticky=W,pady=3,padx=2)
 
         #Take photo button
@@ -184,7 +185,7 @@ class Student:
         scroll_x=ttk.Scrollbar(Table_fram,orient=HORIZONTAL)
         scroll_y=ttk.Scrollbar(Table_fram,orient=VERTICAL)
 
-        self.student_table=ttk.Treeview(Table_fram,column=("Department","Semester","Name","Student ID","Teacher","Photo"),xscrollcommand=scroll_x.set,yscrollcommand=scroll_y.set)
+        self.student_table=ttk.Treeview(Table_fram,column=("Department","Course","Batch","Semester","Teacher","Student ID","Name","Photo"),xscrollcommand=scroll_x.set,yscrollcommand=scroll_y.set)
         scroll_x.pack(side=BOTTOM,fill=X)
         scroll_y.pack(side=RIGHT,fill=Y)
         scroll_x.config(command=self.student_table.xview)
@@ -192,33 +193,142 @@ class Student:
 
 
         self.student_table.heading("Department",text="Department")
+        self.student_table.heading("Course",text="Course")
+        self.student_table.heading("Batch",text="Batch")
         self.student_table.heading("Semester",text="Semester")
-        self.student_table.heading("Name",text="Name")
-        self.student_table.heading("Student ID",text="Student ID")
         self.student_table.heading("Teacher",text="Course Teacher")
+        self.student_table.heading("Student ID",text="Student ID")
+        self.student_table.heading("Name",text="Name")
         self.student_table.heading("Photo",text="Photo")
         self.student_table["show"]="headings"
 
-        self.student_table.pack(fill=BOTH,expand=1)
+       
         self.student_table.column("Department",width=100)
+        self.student_table.column("Course",width=100)
+        self.student_table.column("Batch",width=50)
         self.student_table.column("Semester",width=100)
-        self.student_table.column("Name",width=200)
-        self.student_table.column("Student ID",width=80)
         self.student_table.column("Teacher",width=200)
+        self.student_table.column("Student ID",width=80)
+        self.student_table.column("Name",width=200)
         self.student_table.column("Photo",width=200)
+
+        self.student_table.pack(fill=BOTH,expand=1)
+        self.student_table.bind("<ButtonRelease>",self.get_cursor)
+        self.fetch_data()
 
     # function 
     def add_data(self):
-        if self.var_dept.get()=="Select Department" or self.var_std_name.get()=="" or self.var_std_id.get()=="":
-            
+        if self.var_dept.get()=="Select Department" or self.var_std_name.get()=="" or self.var_std_id.get()=="" or self.var_teacher.get()=="":
+            messagebox.showerror("Error","All Fields are required",parent=self.root)
+        else:
+            try:
+                conn=mysql.connector.connect(host="localhost",username="root",password="1234",database="smart_attendance_system")
+                my_cursor=conn.cursor()
+                my_cursor.execute("insert into students values(%s,%s,%s,%s,%s,%s,%s,%s)",(
+                    self.var_dept.get(),
+                    self.var_course.get(),
+                    self.var_batch.get(),
+                    self.var_semsester.get(),
+                    self.var_teacher.get(),
+                    self.var_std_id.get(),
+                    self.var_std_name.get(),
+                    self.var_radio1.get()
 
+                ))
+                conn.commit()
+                self.fetch_data()
+                conn.close()
+                messagebox.showinfo("success","Successfully Saved")
+            except Exception as es:
+                 messagebox.showerror("Error",f"Due To:{str(es)}",parent=self.root)
+            
+    # fetch data
+    def fetch_data(self):
+        conn=mysql.connector.connect(host="localhost",username="root",password="1234",database="smart_attendance_system")
+        my_cursor=conn.cursor()
+        my_cursor.execute("select * from students")
+        data=my_cursor.fetchall()
+        if len(data)!=0:
+            self.student_table.delete(*self.student_table.get_children())
+            for i in data:
+                self.student_table.insert("",END,values=i)
+            conn.commit()
+        conn.close()
         
 
+    #  get cursor
+    def get_cursor(self,event=""):
+        cursor_focus=self.student_table.focus()
+        content=self.student_table.item(cursor_focus)
+        data=content["values"]
 
+        self.var_dept.set(data[0]),
+        self.var_course.set(data[1]),
+        self.var_batch.set(data[2]),
+        self.var_semsester.set(data[3]),
+        self.var_teacher.set(data[4]),
+        self.var_std_id.set(data[5]),
+        self.var_std_name.set(data[6]),
+        self.var_radio1.set(data[7])
+    # Update function
+    def update_data(self):
+        if self.var_dept.get()=="Select Department" or self.var_std_name.get()=="" or self.var_std_id.get()=="" or self.var_teacher.get()=="":
+            messagebox.showerror("Error","All Fields are required",parent=self.root)
+        else:
+            try:
+                Update=messagebox.askyesno("Update","Do you want to Update data!",parent=self.root)
+                if Update>0:
+                     conn=mysql.connector.connect(host="localhost",username="root",password="1234",database="smart_attendance_system")
+                     my_cursor=conn.cursor()
+                     my_cursor.execute("update students set department=%s,course=%s,batch=%s,semester=%s,course_teacher=%s,std_id=%s,std_name=%s,photo_sample=%s where std_id=%s",(
+                            self.var_dept.get(),
+                            self.var_course.get(),
+                            self.var_batch.get(),
+                            self.var_semsester.get(),
+                            self.var_teacher.get(),
+                            self.var_std_id.get(),
+                            self.var_std_name.get(),
+                            self.var_radio1.get(),
+                            self.var_std_id.get() 
+                     ))
+                else:
+                    if  not Update:
+                        return
+                messagebox.showinfo("success","Successfully Update",parent=self.root)
+                conn.commit()
+                self.fetch_data()
+                conn.close()
+            except Exception as es:
+                 messagebox.showerror("Error",f"Due To:{str(es)}",parent=self.root)
+    # delete function
+    def delete_data(self):
+        if self.var_std_id.get()=="":
+            messagebox.showerror("Error","Id Fields are required",parent=self.root)
+        else:
+            try:
+                Delete=messagebox.askyesno("Delete","Do you want to Delete data!",parent=self.root)
+                if Delete>0:
+                     conn=mysql.connector.connect(host="localhost",username="root",password="1234",database="smart_attendance_system")
+                     my_cursor=conn.cursor()
+                     my_cursor.execute("delete  from students where std_id=%s",(self.var_std_id.get(),))
+                else:
+                    if not Delete:
+                        return
+                conn.commit()
+                self.fetch_data()
+                conn.close()
+                messagebox.showinfo("success","Successfully Delete",parent=self.root)
+              
+            except Exception as es:
+                 messagebox.showerror("Error",f"Due To:{str(es)}",parent=self.root)
 
-
-
-
+    # reset button
+    def reset_data(self):
+               self.var_std_id.set(""),
+               self.var_std_name.set(""),
+               self.var_radio1.set("NO"),
+               self.var_radio2.set("NO"),
+               self.var_std_id.set("") 
 
 
 
