@@ -353,10 +353,7 @@ class Student:
                             self.var_radio1.get(),
                             self.var_std_id.get()==id+1
                      ))
-                conn.commit()
-                self.fetch_data()
-                self.reset_data()
-                conn.close() 
+               
 
                 face_classifier=cv2.CascadeClassifier("haarcascade_frontalface_default.xml")    
                 def face_cropped(img):
@@ -382,9 +379,15 @@ class Student:
                         break
                 cap.release()
                 cv2.destroyAllWindows()
+                cursor2=conn.cursor()
+                cursor2.execute("update students set photo_sample=%s where std_id=%s",("YES",self.var_std_id.get()))
+
                 messagebox.showinfo("Result","Generating data sets complete!")
 
-
+                conn.commit()
+                self.fetch_data()
+                self.reset_data()
+                conn.close() 
 
             except Exception as es:
                  messagebox.showerror("Error",f"Due To:{str(es)}",parent=self.root)
