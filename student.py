@@ -3,6 +3,7 @@ from tkinter import ttk
 from PIL import Image,ImageTk
 from tkinter import messagebox
 import mysql.connector
+import cv2
 class Student:
     def __init__(self,root):
         self.root=root
@@ -145,7 +146,7 @@ class Student:
         Reset_btn.grid(row=0,column=3,sticky=W,pady=3,padx=2)
 
         #Take photo button
-        Take_photo_btn=Button(btn_fram,text="Take Photo Sample",width=33,font=("times new roman",13,"bold"),bg="#0059b3",fg="white")
+        Take_photo_btn=Button(btn_fram,text="Take Photo Sample",command=self.generate_dataset,width=33,font=("times new roman",13,"bold"),bg="#0059b3",fg="white")
         Take_photo_btn.grid(row=1,column=0,columnspan=2,sticky=W,pady=3,padx=4)
         #update photo button
         Update_photo_btn=Button(btn_fram,text="Update Photo Sample",width=33,font=("times new roman",13,"bold"),bg="#0059b3",fg="white")
@@ -329,6 +330,66 @@ class Student:
                self.var_radio1.set("NO"),
                self.var_radio2.set("NO"),
                self.var_std_id.set("") 
+    #take photo sample
+    def generate_dataset(self):
+        if self.var_dept.get()=="Select Department" or self.var_std_name.get()=="" or self.var_std_id.get()=="" or self.var_teacher.get()=="":
+            messagebox.showerror("Error","All Fields are required",parent=self.root)
+        else:
+            try:
+                conn=mysql.connector.connect(host="localhost",username="root",password="1234",database="smart_attendance_system")
+                my_cursor=conn.cursor()
+                my_cursor.execute("select * from students")
+                my_result=my_cursor.fetchall()
+                id=0 
+                for x in my_result:
+                    id+=1
+                my_cursor.execute("update students set department=%s,course=%s,batch=%s,semester=%s,course_teacher=%s,std_name=%s,photo_sample=%s where std_id=%s",(
+                            self.var_dept.get(),
+                            self.var_course.get(),
+                            self.var_batch.get(),
+                            self.var_semsester.get(),
+                            self.var_teacher.get(),
+                            self.var_std_name.get(),
+                            self.var_radio1.get(),
+                            self.var_std_id.get()==id+1
+                     ))
+                conn.commit()
+                self.fetch_data()
+                self.reset_data()
+                conn.close() 
+
+                face_classifier=cv2.CascadeClassifier("haarcascade_frontalface_default.xml")    
+                def face_cropped(img):
+                    gray=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+                    faces=face_classifier.detectMultiScale(gray,1.3,5)
+                    for(x,y,w,h) in faces:
+                        face_cropped=img[y:y+h,x:x+w]
+                        return face_cropped
+                cap=cv2.VideoCapture(0)
+                img_id=0
+                while True:
+                    ret,my_frame=cap.read()
+                    if face_cropped(my_frame) is not None:
+                        img_id+=1
+                        face=cv2.resize(face_cropped(my_frame),(450,450))
+                        face=cv2.cvtColor(face,cv2.COLOR_BGR2GRAY)
+                        file_name_path="data/user."+str(id)+"."+str(img_id)+".jpg"
+                        cv2.imwrite(file_name_path,face)
+                        cv2.putText(face,str(img_id),(50,50),cv2.FONT_HERSHEY_COMPLEX,2,(0,255,0),2)
+                        cv2.imshow("Cropped Face",face)
+
+                    if cv2.waitKey(1)==13 or int(img_id)==100:
+                        break
+                cap.release()
+                cv2.destroyAllWindows()
+                messagebox.showinfo("Result","Generating data sets complete!")
+
+
+
+            except Exception as es:
+                 messagebox.showerror("Error",f"Due To:{str(es)}",parent=self.root)
+
+
 
 
 
